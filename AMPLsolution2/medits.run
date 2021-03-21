@@ -1,0 +1,57 @@
+reset;
+
+model medits.mod;
+data medits.dat;
+
+option solver gurobi;
+option gurobi_options 'logfile=log.txt';
+
+table data IN "amplxl" "kcluster.xlsx":
+	NODES <- [ID], LAT, LONG, KG_TIME, DEPTH, STRATUM, ZONE, HAUL_TIME;
+	
+
+load amplxl.dll;
+read table data;
+
+set C1 := 1..card(NODES);
+set C2 := 1..card(NODES);
+
+table distances IN "amplxl" "2D"
+	[C1, C2], TRAVEL_TIME;
+	
+read table distances;
+
+solve;
+
+display OBJ;
+
+printf "LONG\tLAT\n" > solution.txt;
+
+var aux := CRT;
+
+for {i in 1..card(NODES)} {
+	for {(aux,j) in EDGES: X[aux,j] = 1} {
+		
+		printf(LONG[aux]) > solution.txt;
+		printf "\t" > solution.txt;
+		
+		printf(LAT[aux]) > solution.txt;
+		
+#		printf "\t" > solution.txt;
+#		for {d in DAYS: D[aux,d] = 1} printf(d) > solution.txt;
+		
+		printf "\n" > solution.txt;
+		
+		printf(LONG[j]) > solution.txt;
+		printf "\t" > solution.txt;
+		
+		printf(LAT[j]) > solution.txt;
+		
+#		printf "\t" > solution.txt;
+#		for {d in DAYS: D[j,d] = 1} printf(d) > solution.txt;
+		
+		printf "\n" > solution.txt;
+		
+		let aux := j;
+	}
+}

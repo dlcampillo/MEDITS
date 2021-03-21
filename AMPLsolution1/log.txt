@@ -1,0 +1,3 @@
+CPLEX 20.1.0.0: optimal integer solution; objective 200
+149168 MIP simplex iterations
+2650 branch-and-bound nodes
