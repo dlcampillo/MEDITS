@@ -4,7 +4,10 @@ model medits.mod;
 data medits.dat;
 
 option solver gurobi;
+option kestrel_options 'solver=cplex';
+option cplex_options 'mipdisplay=3';
 option gurobi_options 'logfile=log.txt';
+option email 'david.lozanoc@um.es';
 
 table data IN "amplxl" "kcluster.xlsx":
 	NODES <- [ID], LAT, LONG, KG_TIME, DEPTH, STRATUM, ZONE, HAUL_TIME;
@@ -23,32 +26,28 @@ read table distances;
 
 solve;
 
-display OBJ;
+printf "CUADERNO DE BITACORA\n\n" > solution.txt;
 
-printf "LONG\tLAT\n" > solution.txt;
+printf "Numero de lances: " > solution.txt;
+printf(sum {i in NODES, d in DAYS} D[i,d]) > solution.txt;
+printf "\n" > solution.txt;
+
+printf "Distancia total: " > solution.txt;
+printf(sum{(i,j) in EDGES} X[i,j] * TRAVEL_TIME[i,j]) > solution.txt;
+printf "\n\n" > solution.txt;
+
+printf "LONG\t\t\tLAT\t\t\tDAY\t\tHOUR\n" > solution.txt;
 
 var aux := CRT;
 
 for {i in 1..card(NODES)} {
 	for {(aux,j) in EDGES: X[aux,j] = 1} {
 		
-		printf(LONG[aux]) > solution.txt;
-		printf "\t" > solution.txt;
+		printf "%.7f", LONG[aux] > solution.txt;
+		printf "\t\t" > solution.txt;
 		
-		printf(LAT[aux]) > solution.txt;
-		
-#		printf "\t" > solution.txt;
-#		for {d in DAYS: D[aux,d] = 1} printf(d) > solution.txt;
-		
-		printf "\n" > solution.txt;
-		
-		printf(LONG[j]) > solution.txt;
-		printf "\t" > solution.txt;
-		
-		printf(LAT[j]) > solution.txt;
-		
-#		printf "\t" > solution.txt;
-#		for {d in DAYS: D[j,d] = 1} printf(d) > solution.txt;
+		printf "%.7f", LAT[aux] > solution.txt;
+		printf "\t\t" > solution.txt;
 		
 		printf "\n" > solution.txt;
 		
